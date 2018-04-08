@@ -35,15 +35,19 @@ def analyze_posts(OUT_FILENAME):
     trigger_words = ["pass", "fail"]
     total_pass_fail_posts = 0
     with open("ccna_pass_fail.txt", "w") as ccnafile:
+        unique_authors = set()
         for post_line in post_dict_list:
             post = ast.literal_eval(post_line)
             title = post.get("title")
+            author = post.get("author")
+            unique_authors.update(author)
             for word in trigger_words:
                 if word in title.lower():
                     total_pass_fail_posts += 1
                     ccnafile.write("{}\n".format(title))
     print("{} matching out of {}".format(total_pass_fail_posts, len(post_dict_list)))
     print("Percentage: {}".format(total_pass_fail_posts/len(post_dict_list)*100))
+    print("{} unique authors found.".format(len(unique_authors)))
 
         
 
