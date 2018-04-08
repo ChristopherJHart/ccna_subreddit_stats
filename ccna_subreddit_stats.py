@@ -3,6 +3,8 @@ import sys
 import json
 import ast
 import time
+from statistics import mean, median
+import pprint
 
 def get_new_posts_json(after_timestamp=None):
     api_url = "https://www.reddit.com/r/ccna/new.json?limit=100"
@@ -26,6 +28,7 @@ def write_posts_to_file(post_data_list, filename, writemode):
             post_dict["time_created"] = post.get("data").get("created")
             post_dict["title"] = post.get("data").get("title")
             post_dict["post_url"] = post.get("data").get("url")
+            post_dict["num_comments"] = post.get("data").get("num_comments")
             outfile.write("{}\n".format(post_dict))
     print("\tAll post information written to file")
 
@@ -36,18 +39,21 @@ def analyze_posts(OUT_FILENAME):
     total_pass_fail_posts = 0
     with open("ccna_pass_fail.txt", "w") as ccnafile:
         unique_authors = set()
+        unique_num_comments = []
         for post_line in post_dict_list:
             post = ast.literal_eval(post_line)
             title = post.get("title")
             author = post.get("author")
-            unique_authors.update(author)
+            unique_authors.add(author)
             for word in trigger_words:
                 if word in title.lower():
                     total_pass_fail_posts += 1
+                    unique_num_comments.append(post.get("num_comments"))
                     ccnafile.write("{}\n".format(title))
     print("{} matching out of {}".format(total_pass_fail_posts, len(post_dict_list)))
     print("Percentage: {}".format(total_pass_fail_posts/len(post_dict_list)*100))
     print("{} unique authors found.".format(len(unique_authors)))
+    print("Comments stats | Min: {} Max: {} Mean: {} Median: {}".format(min(unique_num_comments), max(unique_num_comments), mean(unique_num_comments), median(unique_num_comments)))
 
         
 
